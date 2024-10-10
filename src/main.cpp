@@ -41,6 +41,8 @@ void credits();
 void printChoices(int screen, int (&choices)[4]);
 void handleInput(int screen, char input, int (&choices)[4]);
 void wakeUp();
+void leaveShelter();
+void flickeringLight();
 
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
@@ -90,6 +92,19 @@ void getScreen(int screen)
 		break;
 	case 3:
 		credits();
+		break;
+	}
+}
+
+void changeScene(int scene)
+{
+	switch (scene)
+	{
+	case 1:
+		wakeUp();
+		break;
+	case 2:
+		leaveShelter();
 		break;
 	}
 }
@@ -271,7 +286,6 @@ void gameLoop()
 
 void handleInput(int screen, char input, int (&choices)[4])
 {
-	clearScreen();
 	resetInput();
 
 	// DEBUG
@@ -279,9 +293,6 @@ void handleInput(int screen, char input, int (&choices)[4])
 	cout << !isalpha(input) << endl;
 	if (!isalpha(input))
 		cout << choices[(input - '0') - 1] << endl;
-
-	if (input == 'q')
-		exitGame();
 
 	while (!isalpha(input) && choices[(input - '0') - 1] == 1)
 	{
@@ -291,15 +302,18 @@ void handleInput(int screen, char input, int (&choices)[4])
 		getChar(input, screen, "Enter your choice: ", true);
 	}
 
+	if (input == 'q')
+		exitGame();
+
 	switch (screen)
 	{
 	case 1:
+		clearScreen();
 		switch (input)
 		{
 		case ('1'):
-			cout << "You leave the shelter and scout the area.\n";
-			screen = 2;
 			resetChoices(choices);
+			changeScene(2);
 			break;
 		case ('2'):
 			cout << "You check your gear for supplies and weapons.\n";
@@ -321,7 +335,19 @@ void handleInput(int screen, char input, int (&choices)[4])
 		}
 		break;
 	case 2:
-		cout << "You left the camp.\n";
+		clearScreen();
+		switch (input)
+		{
+		case ('1'):
+			cout << "You investigate the flickering light.\n";
+			break;
+		case ('2'):
+			cout << "You head towards the abandoned factory.\n";
+			break;
+		default:
+			cout << "Invalid choice\n";
+			break;
+		}
 		break;
 	}
 
@@ -339,10 +365,6 @@ void printChoices(int screen, int (&choices)[4])
 	switch (screen)
 	{
 	case 1:
-		// Iterate the array and print the choices
-		// 0,0,0,0 print 1-4
-		// 0,0,1,0 print 1,2,4
-
 		for (int i = 0; i < choicesCount; i++)
 		{
 			if (choices[i] == 0)
@@ -376,7 +398,32 @@ void printChoices(int screen, int (&choices)[4])
 				break;
 			}
 			count++;
+		};
+		break;
+	case 2:
+		for (int i = 0; i < choicesCount; i++)
+		{
+			if (choices[i] == 0)
+				cout << i + 1;
+
+			switch (count)
+			{
+			case 0:
+				if (choices[i] == 0)
+				{
+					cout << ". Investigate the flickering light." << endl;
+				}
+				break;
+			case 1:
+				if (choices[i] == 0)
+				{
+					cout << ". Head towards the abandoned factory." << endl;
+				}
+				break;
+			}
+			count++;
 		}
+		break;
 	}
 	cout << "==============================\n";
 }
@@ -392,6 +439,33 @@ void wakeUp()
 	printChoices(1, choices);
 	getChar(input, 1, "Enter your choice: ", true);
 	handleInput(1, input, choices);
+}
+
+void leaveShelter()
+{
+	char input;
+	int choices[] = {0, 0, -1, -1};
+
+	cout << "You leave the shelter and scout the area.\n"
+		 << "You see a flickering light in the distance and an abandoned factory nearby.\n"
+		 << endl;
+
+	printChoices(2, choices);
+	getChar(input, 2, "Enter your choice: ", true);
+	handleInput(2, input, choices);
+}
+
+void flickeringLight()
+{
+	char input;
+	int choices[] = {0, 0, -1, -1};
+
+	cout << "You investigate the flickering light and find a stash of supplies.\n"
+		 << endl;
+
+	printChoices(2, choices);
+	getChar(input, 2, "Enter your choice: ", true);
+	handleInput(2, input, choices);
 }
 
 int main()
