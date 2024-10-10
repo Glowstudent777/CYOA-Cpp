@@ -4,6 +4,7 @@
  *****/
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <limits>
 
@@ -20,11 +21,26 @@
 
 using namespace std;
 
+const string title = "STALKER: Zone of Shadows";
+int FLAGS[] = {0, 0, 0, 0};
+// Inventory Items
+// 0: Empty
+// 1: Medkit
+// 2: Food
+// 3: Ammo
+// 4: Pistol
+int inventory[] = {0, 0, 0, 0};
+
 // Screens
 void titleScreen();
 void instructionScreen();
 void gameLoop();
 void credits();
+
+// Game Story + Choices
+void printChoices(int screen, int (&choices)[4]);
+void handleInput(int screen, char input, int (&choices)[4]);
+void wakeUp();
 
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
@@ -48,6 +64,20 @@ void resetInput()
 	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
+void resetChoices(int (&choices)[4])
+{
+	for (int i = 0; i < size(choices); i++)
+	{
+		choices[i] = 0;
+	}
+}
+
+void exitGame(int code = 0)
+{
+	cout << "Exiting " << title << "..." << endl;
+	exit(code);
+}
+
 void getScreen(int screen)
 {
 	switch (screen)
@@ -62,6 +92,48 @@ void getScreen(int screen)
 		credits();
 		break;
 	}
+}
+
+void addFlag(int flag)
+{
+	FLAGS[flag] = 1;
+}
+
+void addInventory(int item)
+{
+	// Find the first empty slot
+	for (int i = 0; i < size(inventory); i++)
+	{
+		if (inventory[i] == 0)
+		{
+			inventory[i] = item;
+			break;
+		}
+	}
+}
+
+void removeInventory(int item)
+{
+	for (int i = 0; i < size(inventory); i++)
+	{
+		if (inventory[i] == item)
+		{
+			inventory[i] = 0;
+			break;
+		}
+	}
+}
+
+bool hasItem(int item)
+{
+	for (int i = 0; i < size(inventory); i++)
+	{
+		if (inventory[i] == item)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void getInt(int &input, int screen, int min, int max, string cmessage = "", bool clearOnFail = false)
@@ -127,14 +199,14 @@ void titleScreen()
 
 	clearScreen();
 
-	cout << "===============================\n";
-	cout << "   CHOOSE YOUR OWN ADVENTURE   \n";
-	cout << "===============================\n";
+	cout << "==============================\n";
+	cout << setw(title.length() + 3) << title << "\n";
+	cout << "==============================\n";
 	cout << "1. Start Adventure\n";
 	cout << "2. Instructions\n";
 	cout << "3. Credits\n";
 	cout << "4. Exit\n";
-	cout << "===============================\n";
+	cout << "==============================\n";
 
 	getInt(choice, 1, 1, 4, "Enter your choice (1-4): ");
 
@@ -180,8 +252,7 @@ void instructionScreen()
 	cout << "         INSTRUCTIONS         \n";
 	cout << "==============================\n";
 	cout << "q: Exit\n";
-	cout << "1: Choice 1\n";
-	cout << "2: Choice 2\n";
+	cout << "1-4: Choices 1-4\n";
 	cout << "==============================\n";
 	cout << "Press ENTER to return to the main menu...";
 	cin.get();
@@ -194,24 +265,139 @@ void gameLoop()
 
 	clearScreen();
 
-	cout << "Do something" << endl;
-	cout << "q to exit" << endl;
+	// The story begins here
+	wakeUp();
+}
 
-	getChar(input, 1, "Enter your choice: ", true);
+void handleInput(int screen, char input, int (&choices)[4])
+{
+	clearScreen();
+	resetInput();
 
-	switch (input)
+	// DEBUG
+	cout << choices[0] << choices[1] << choices[2] << choices[3] << endl;
+	cout << !isalpha(input) << endl;
+	if (!isalpha(input))
+		cout << choices[(input - '0') - 1] << endl;
+
+	if (input == 'q')
+		exitGame();
+
+	while (!isalpha(input) && choices[(input - '0') - 1] == 1)
 	{
-	case ('1'):
-		cout << "Choice 1";
+		clearScreen();
+		cout << "You have already chosen this option.\n";
+		printChoices(screen, choices);
+		getChar(input, screen, "Enter your choice: ", true);
+	}
+
+	switch (screen)
+	{
+	case 1:
+		switch (input)
+		{
+		case ('1'):
+			cout << "You leave the shelter and scout the area.\n";
+			screen = 2;
+			resetChoices(choices);
+			break;
+		case ('2'):
+			cout << "You check your gear for supplies and weapons.\n";
+			cout << "You find a medkit.\n";
+			addInventory(1);
+			choices[1] = 1;
+			break;
+		case ('3'):
+			cout << "You listen to the radio for any updates from fellow stalkers.\n";
+			choices[2] = 1;
+			break;
+		case ('4'):
+			cout << "You draw a map of the nearby locations you remember.\n";
+			choices[3] = 1;
+			break;
+		default:
+			cout << "Invalid choice\n";
+			break;
+		}
 		break;
-	case ('2'):
-		cout << "Choice 2";
+	case 2:
+		cout << "You left the camp.\n";
 		break;
 	}
+
+	cout << "\nWhat will you do next?\n";
+	printChoices(screen, choices);
+	getChar(input, screen, "Enter your choice: ", true);
+	handleInput(screen, input, choices);
+}
+
+void printChoices(int screen, int (&choices)[4])
+{
+	int count = 0;
+	int choicesCount = sizeof(choices) / sizeof(int);
+	cout << "==============================\n";
+	switch (screen)
+	{
+	case 1:
+		// Iterate the array and print the choices
+		// 0,0,0,0 print 1-4
+		// 0,0,1,0 print 1,2,4
+
+		for (int i = 0; i < choicesCount; i++)
+		{
+			if (choices[i] == 0)
+				cout << i + 1;
+
+			switch (count)
+			{
+			case 0:
+				if (choices[i] == 0)
+				{
+					cout << ". Leave the shelter and scout the area." << endl;
+				}
+				break;
+			case 1:
+				if (choices[i] == 0)
+				{
+					cout << ". Check your gear for supplies and weapons." << endl;
+				}
+				break;
+			case 2:
+				if (choices[i] == 0)
+				{
+					cout << ". Listen to the radio for any updates from fellow stalkers." << endl;
+				}
+				break;
+			case 3:
+				if (choices[i] == 0)
+				{
+					cout << ". Draw a map of the nearby locations you remember." << endl;
+				}
+				break;
+			}
+			count++;
+		}
+	}
+	cout << "==============================\n";
+}
+
+void wakeUp()
+{
+	char input;
+	int choices[] = {0, 0, 0, 0};
+
+	cout << "You wake up in a dimly lit shelter deep within the Zone, the air thick with tension. The faint sounds of distant gunfire echo, reminding you that danger is ever-present. You need to decide your next move to survive and find valuable artifacts.\n"
+		 << endl;
+
+	printChoices(1, choices);
+	getChar(input, 1, "Enter your choice: ", true);
+	handleInput(1, input, choices);
 }
 
 int main()
 {
+	cout << "\033]0;" << title << "\007";
+
 	clearScreen();
 	getScreen(1);
 
