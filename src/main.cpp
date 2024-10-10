@@ -20,10 +20,15 @@
 
 using namespace std;
 
+// Screens
 void titleScreen();
+void instructionScreen();
+void gameLoop();
 void credits();
+
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
+void getChar(char &input, int screen, string cmessage, bool allowInt, bool clearOnFail);
 
 void clearScreen()
 {
@@ -50,6 +55,9 @@ void getScreen(int screen)
 	case 1:
 		titleScreen();
 		break;
+	case 2:
+		instructionScreen();
+		break;
 	case 3:
 		credits();
 		break;
@@ -69,6 +77,31 @@ void getInt(int &input, int screen, int min, int max, string cmessage = "", bool
 	cin >> input;
 
 	while (cin.fail() || input < min || input > max)
+	{
+		if (clearOnFail == true)
+		{
+			clearScreen();
+			getScreen(screen);
+		}
+		resetInput();
+		cout << "Invalid Input. Please enter a valid input: ";
+		cin >> input;
+	}
+}
+
+void getChar(char &input, int screen, string cmessage = "", bool allowInt = false, bool clearOnFail = false)
+{
+	if (cmessage != "")
+	{
+		cout << cmessage;
+	}
+	else
+	{
+		cout << "Enter your choice: ";
+	}
+	cin >> input;
+
+	while (cin.fail() || (!allowInt && !isalpha(input)))
 	{
 		if (clearOnFail == true)
 		{
@@ -109,9 +142,10 @@ void titleScreen()
 	{
 	case 1:
 		cout << "Starting Adventure...\n";
+		gameLoop();
 		break;
 	case 2:
-		cout << "Instructions...\n";
+		getScreen(2);
 		break;
 	case 3:
 		getScreen(3);
@@ -132,14 +166,52 @@ void credits()
 	cout << "===============================\n";
 	cout << "Author: Glowstudent\n";
 	cout << "===============================\n";
-	cout << "Press any key to return to the main menu...";
+	cout << "Press ENTER to return to the main menu...";
 	cin.get();
 	getScreen(1);
 }
 
+void instructionScreen()
+{
+	clearScreen();
+	resetInput();
+
+	cout << "==============================\n";
+	cout << "         INSTRUCTIONS         \n";
+	cout << "==============================\n";
+	cout << "q: Exit\n";
+	cout << "1: Choice 1\n";
+	cout << "2: Choice 2\n";
+	cout << "==============================\n";
+	cout << "Press ENTER to return to the main menu...";
+	cin.get();
+	getScreen(1);
+}
+
+void gameLoop()
+{
+	char input;
+
+	clearScreen();
+
+	cout << "Do something" << endl;
+	cout << "q to exit" << endl;
+
+	getChar(input, 1, "Enter your choice: ", true);
+
+	switch (input)
+	{
+	case ('1'):
+		cout << "Choice 1";
+		break;
+	case ('2'):
+		cout << "Choice 2";
+		break;
+	}
+}
+
 int main()
 {
-
 	clearScreen();
 	getScreen(1);
 
