@@ -354,10 +354,17 @@ void handleInput(int screen, char input, int (&choices)[4])
 			changeScene(2);
 			break;
 		case ('2'):
-			cout << flipCoin() << endl;
-			cout << "You check your gear for supplies and weapons.\n";
-			cout << "You find a medkit.\n";
-			addInventory(1);
+			if (flipWeighted(1, 10, 8))
+			{
+				cout << "You check your gear for supplies and weapons.\n";
+				cout << "You find a medkit.\n";
+				addInventory(1);
+			}
+			else
+			{
+				cout << "You check your gear for supplies and weapons.\n";
+				cout << "You find nothing useful.\n";
+			}
 			choices[1] = 1;
 			break;
 		case ('3'):
