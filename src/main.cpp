@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <string>
 #include <limits>
+#include <random>
 
 // https://stackoverflow.com/questions/70879879/how-can-i-make-a-rectangle-with-text-in-the-center-in-c
 // https://stackoverflow.com/questions/31396911/c-print-a-box-application
@@ -78,6 +79,43 @@ void exitGame(int code = 0)
 {
 	cout << "Exiting " << title << "..." << endl;
 	exit(code);
+}
+
+int random(int min, int max)
+{
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<float> dis(min, max);
+
+	return dis(gen);
+}
+
+int flipCoin()
+{
+	int weight = random(1, 10);
+
+	if (weight <= 5)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+int flipWeighted(int min, int max, int weight)
+{
+	int initial = random(1, 10);
+
+	if (initial <= weight)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 void getScreen(int screen)
@@ -316,6 +354,7 @@ void handleInput(int screen, char input, int (&choices)[4])
 			changeScene(2);
 			break;
 		case ('2'):
+			cout << flipCoin() << endl;
 			cout << "You check your gear for supplies and weapons.\n";
 			cout << "You find a medkit.\n";
 			addInventory(1);
@@ -343,6 +382,25 @@ void handleInput(int screen, char input, int (&choices)[4])
 			break;
 		case ('2'):
 			cout << "You head towards the abandoned factory.\n";
+			break;
+		default:
+			cout << "Invalid choice\n";
+			break;
+		}
+		break;
+	// You investigate the flickering light.
+	case 3:
+		clearScreen();
+		switch (input)
+		{
+		case ('1'):
+			cout << "You approach the stalkers and introduce yourself.\n";
+			break;
+		case ('2'):
+			cout << "You sneak around to search their supplies.\n";
+			break;
+		case ('3'):
+			cout << "You offer to help the wounded stalker.\n";
 			break;
 		default:
 			cout << "Invalid choice\n";
@@ -398,7 +456,7 @@ void printChoices(int screen, int (&choices)[4])
 				break;
 			}
 			count++;
-		};
+		}
 		break;
 	case 2:
 		for (int i = 0; i < choicesCount; i++)
@@ -424,7 +482,38 @@ void printChoices(int screen, int (&choices)[4])
 			count++;
 		}
 		break;
+	case 3:
+		for (int i = 0; i < choicesCount; i++)
+		{
+			if (choices[i] == 0)
+				cout << i + 1;
+
+			switch (count)
+			{
+			case 0:
+				if (choices[i] == 0)
+				{
+					cout << ". Approach the stalkers and introduce yourself." << endl;
+				}
+				break;
+			case 1:
+				if (choices[i] == 0)
+				{
+					cout << ". Sneak around to search their supplies." << endl;
+				}
+				break;
+			case 2:
+				if (choices[i] == 0)
+				{
+					cout << ". Offer to help the wounded stalker." << endl;
+				}
+				break;
+			}
+			count++;
+		}
+		break;
 	}
+
 	cout << "==============================\n";
 }
 
@@ -460,7 +549,8 @@ void flickeringLight()
 	char input;
 	int choices[] = {0, 0, -1, -1};
 
-	cout << "You investigate the flickering light and find a stash of supplies.\n"
+	cout << "You approach the light and discover it's coming from a small campfire. A group of stalkers sits around it, looking wary but not hostile.\n"
+		 << "As you get closer you see a wounded stalker who needs medical attention.\n"
 		 << endl;
 
 	printChoices(2, choices);
