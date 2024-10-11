@@ -9,6 +9,9 @@
 #include <limits>
 #include <random>
 
+#include <thread>
+#include <chrono>
+
 // https://stackoverflow.com/questions/70879879/how-can-i-make-a-rectangle-with-text-in-the-center-in-c
 // https://stackoverflow.com/questions/31396911/c-print-a-box-application
 // https://stackoverflow.com/questions/23369503/get-size-of-terminal-window-rows-columns
@@ -38,9 +41,10 @@ void instructionScreen();
 void gameLoop();
 void credits();
 
-// Game Story + Choices
 void printChoices(int screen, int (&choices)[4]);
 void handleInput(int screen, char input, int (&choices)[4]);
+
+// Game Story + Choices
 void wakeUp();
 void leaveShelter();
 void abandonedFactory();
@@ -51,6 +55,7 @@ void flickeringLight_2();
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
 void getChar(char &input, int screen, string cmessage, bool allowInt, bool clearOnFail);
+bool quickTimeEvent(char expected, int time);
 
 void clearScreen()
 {
@@ -323,6 +328,29 @@ void gameLoop()
 
 	// The story begins here
 	wakeUp();
+}
+
+bool quickTimeEvent(char expected, int time)
+{
+	char input;
+	bool recieved = false;
+
+	thread t1([&]() {
+		cin >> input;
+		recieved = true;
+	});
+
+	for (int i = 0; i < time; ++i)
+	{
+		if (recieved)
+		{
+			t1.detach();
+			return input == expected;
+		}
+		this_thread::sleep_for(chrono::seconds(1));
+	}
+	t1.detach();
+	return false;
 }
 
 void handleInput(int screen, char input, int (&choices)[4])
@@ -696,7 +724,9 @@ int main()
 	cout << "\033]0;" << title << "\007";
 
 	clearScreen();
-	getScreen(1);
+	bool comp = quickTimeEvent('a', 2);
+	cout << comp << endl;
+	// getScreen(1);
 
 	return 0;
 }
