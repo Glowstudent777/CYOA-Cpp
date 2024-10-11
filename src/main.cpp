@@ -724,9 +724,7 @@ int main()
 	cout << "\033]0;" << title << "\007";
 
 	clearScreen();
-	bool comp = quickTimeEvent('a', 2);
-	cout << comp << endl;
-	// getScreen(1);
+	getScreen(1);
 
 	return 0;
 }
