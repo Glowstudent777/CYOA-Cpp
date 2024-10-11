@@ -11,6 +11,7 @@
 
 #include <thread>
 #include <chrono>
+#include <cstdlib>
 
 // https://stackoverflow.com/questions/70879879/how-can-i-make-a-rectangle-with-text-in-the-center-in-c
 // https://stackoverflow.com/questions/31396911/c-print-a-box-application
@@ -73,6 +74,20 @@ void resetInput()
 {
 	cin.clear();
 	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+void PressEnterToContinue()
+{
+	char c;
+	cout << "Press ENTER to continue..." << flush;
+	do
+	{
+		c = getchar();
+		putchar(c);
+	} while (c != '\n');
+	return;
+	// cout << "Press ENTER to continue..." << flush;
+	// cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 void resetChoices(int (&choices)[4])
@@ -333,24 +348,31 @@ void gameLoop()
 bool quickTimeEvent(char expected, int time)
 {
 	char input;
-	bool recieved = false;
+	auto startTime = chrono::high_resolution_clock::now();
 
-	thread t1([&]()
-			  {
-		cin >> input;
-		recieved = true; });
+	bool playerResponded = false;
+	std::thread inputThread([&playerResponded, &input]()
+							{
+		cin.get(input);
+        playerResponded = true; });
 
-	for (int i = 0; i < time; ++i)
+	while (!playerResponded &&
+		   chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count() < time * 1000)
 	{
-		if (recieved)
-		{
-			t1.detach();
-			return input == expected;
-		}
-		this_thread::sleep_for(chrono::seconds(1));
+		cout << "Time remaining: " << time * 1000 - chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count() << " milliseconds\n";
+		this_thread::sleep_for(chrono::milliseconds(50));
 	}
-	t1.detach();
-	return false;
+
+	inputThread.detach();
+
+	if (playerResponded && input == expected)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void handleInput(int screen, char input, int (&choices)[4])
@@ -642,36 +664,36 @@ void abandonedFactory()
 		 << endl;
 
 	cout << "Press ENTER to continue...";
-	cin.get();
+	PressEnterToContinue();
 
 	// Quick time event to dodge the bullets
 	cout << "Press 'd' to dodge the bullets: ";
 	bool dodged = quickTimeEvent('d', 2);
 
+	clearScreen();
+
 	if (dodged)
 	{
-		resetInput();
-		clearScreen();
 		cout << "You dodge the bullets and take cover behind a nearby car.\n"
 			 << "You see a group of bandits guarding the entrance to the factory.\n"
 			 << "You need to decide your next move.\n"
 			 << endl;
-
-		cout << "Press ENTER to continue...";
-		cin.get();
-		exitGame();
 	}
 	else
 	{
-		resetInput();
-		clearScreen();
 		cout << "You are hit by a bullet and fall to the ground.\n"
 			 << "The bandits approach you and take your gear.\n"
 			 << "You are left to die in the Zone.\n"
 			 << endl;
+	}
 
-		cout << "Press ENTER to return to the main menu...";
-		cin.get();
+	PressEnterToContinue();
+
+	if (dodged)
+		flickeringLight();
+	else
+	{
+		clearScreen();
 		getScreen(1);
 	}
 

@@ -48,6 +48,11 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "mutex": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp"
     }
 }
