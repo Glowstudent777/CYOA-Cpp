@@ -385,7 +385,7 @@ void handleInput(int screen, char input, int (&choices)[4])
 		switch (input)
 		{
 		case ('1'):
-			cout << "You investigate the flickering light.\n";
+			flickeringLight();
 			break;
 		case ('2'):
 			cout << "You head towards the abandoned factory.\n";
@@ -555,14 +555,16 @@ void flickeringLight()
 {
 	char input;
 	int choices[] = {0, 0, -1, -1};
+	if (hasItem(1))
+		choices[2] = 0;
 
 	cout << "You approach the light and discover it's coming from a small campfire. A group of stalkers sits around it, looking wary but not hostile.\n"
 		 << "As you get closer you see a wounded stalker who needs medical attention.\n"
 		 << endl;
 
-	printChoices(2, choices);
-	getChar(input, 2, "Enter your choice: ", true);
-	handleInput(2, input, choices);
+	printChoices(3, choices);
+	getChar(input, 3, "Enter your choice: ", true);
+	handleInput(3, input, choices);
 }
 
 int main()
