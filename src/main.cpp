@@ -9,37 +9,21 @@
 #include <limits>
 #include <random>
 
+#include <conio.h>
+
 #include <thread>
 #include <chrono>
 #include <cstdlib>
-
-// https://stackoverflow.com/questions/70879879/how-can-i-make-a-rectangle-with-text-in-the-center-in-c
-// https://stackoverflow.com/questions/31396911/c-print-a-box-application
-// https://stackoverflow.com/questions/23369503/get-size-of-terminal-window-rows-columns
-// https://cplusplus.com/forum/general/175000/
-// https://www.codeproject.com/Questions/543606/Howplustoplusdrawplusatplusborderplusofplusscreenp
-// https://cplusplus.com/forum/beginner/28341/
-// https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
-// https://stackoverflow.com/questions/1761626/weighted-random-numbers
-// https://cplusplus.com/forum/general/272102/
-// https://patorjk.com/software/taag/#p=display&f=Graffiti&t=Something
 
 using namespace std;
 
 const string title = "STALKER: Zone of Shadows";
 int FLAGS[] = {0, 0, 0, 0};
-// Inventory Items
-// 0: Empty
-// 1: Medkit
-// 2: Food
-// 3: Ammo
-// 4: Pistol
 int inventory[] = {0, 0, 0, 0};
 
 // Screens
 void titleScreen();
 void instructionScreen();
-void gameLoop();
 void credits();
 
 void printChoices(int screen, int (&choices)[4]);
@@ -48,7 +32,9 @@ void handleInput(int screen, char input, int (&choices)[4]);
 // Game Story + Choices
 void wakeUp();
 void leaveShelter();
+
 void abandonedFactory();
+
 void flickeringLight();
 void flickeringLight_1();
 void flickeringLight_2();
@@ -57,6 +43,7 @@ void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
 void getChar(char &input, int screen, string cmessage, bool allowInt, bool clearOnFail);
 bool quickTimeEvent(char expected, int time);
+void PressEnterToContinue();
 
 void clearScreen()
 {
@@ -78,16 +65,13 @@ void resetInput()
 
 void PressEnterToContinue()
 {
-	char c;
-	cout << "Press ENTER to continue..." << flush;
-	do
-	{
-		c = getchar();
-		putchar(c);
-	} while (c != '\n');
-	return;
-	// cout << "Press ENTER to continue..." << flush;
+	char ch;
+
+	cout << "Press Enter to continue...";
+	ch = getch();
+	// cin.get();
 	// cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	// cin.ignore();
 }
 
 void resetChoices(int (&choices)[4])
@@ -166,6 +150,12 @@ void changeScene(int scene)
 		break;
 	case 2:
 		leaveShelter();
+		break;
+	case 3:
+		flickeringLight();
+		break;
+	case 4:
+		abandonedFactory();
 		break;
 	}
 }
@@ -289,8 +279,8 @@ void titleScreen()
 	switch (choice)
 	{
 	case 1:
-		cout << "Starting Adventure...\n";
-		gameLoop();
+		clearScreen();
+		wakeUp();
 		break;
 	case 2:
 		getScreen(2);
@@ -299,7 +289,7 @@ void titleScreen()
 		getScreen(3);
 		break;
 	case 4:
-		cout << "Exiting...\n";
+		exitGame();
 		break;
 	}
 }
@@ -335,44 +325,25 @@ void instructionScreen()
 	getScreen(1);
 }
 
-void gameLoop()
-{
-	char input;
-
-	clearScreen();
-
-	// The story begins here
-	wakeUp();
-}
-
 bool quickTimeEvent(char expected, int time)
 {
-	char input;
+	char ch;
 	auto startTime = chrono::high_resolution_clock::now();
 
 	bool playerResponded = false;
-	std::thread inputThread([&playerResponded, &input]()
+	std::thread inputThread([&playerResponded, &ch]()
 							{
-		cin.get(input);
+		ch = getch();
         playerResponded = true; });
 
 	while (!playerResponded &&
 		   chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count() < time * 1000)
 	{
-		cout << "Time remaining: " << time * 1000 - chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count() << " milliseconds\n";
 		this_thread::sleep_for(chrono::milliseconds(50));
 	}
 
 	inputThread.detach();
-
-	if (playerResponded && input == expected)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return playerResponded && ch == expected;
 }
 
 void handleInput(int screen, char input, int (&choices)[4])
@@ -438,11 +409,11 @@ void handleInput(int screen, char input, int (&choices)[4])
 		{
 		case ('1'):
 			// Stalkers
-			flickeringLight();
+			changeScene(3);
 			break;
 		case ('2'):
 			// Bandits
-			abandonedFactory();
+			changeScene(4);
 			break;
 		default:
 			cout << "Invalid choice\n";
@@ -663,7 +634,6 @@ void abandonedFactory()
 		 << "Get ready to dodge the bullets!\n"
 		 << endl;
 
-	cout << "Press ENTER to continue...";
 	PressEnterToContinue();
 
 	// Quick time event to dodge the bullets
@@ -678,29 +648,18 @@ void abandonedFactory()
 			 << "You see a group of bandits guarding the entrance to the factory.\n"
 			 << "You need to decide your next move.\n"
 			 << endl;
+
+		PressEnterToContinue();
+		changeScene(3);
 	}
 	else
 	{
-		cout << "You are hit by a bullet and fall to the ground.\n"
-			 << "The bandits approach you and take your gear.\n"
-			 << "You are left to die in the Zone.\n"
+		cout << "You are hit by a bullet and fall to the ground.\nThe bandits approach you and take your gear.\nYou are left to die in the Zone."
 			 << endl;
-	}
 
-	PressEnterToContinue();
-
-	if (dodged)
-		flickeringLight();
-	else
-	{
-		clearScreen();
+		PressEnterToContinue();
 		getScreen(1);
 	}
-
-	// Fill in after flickeringLight story is done.
-	// printChoices(2, choices);
-	// getChar(input, 2, "Enter your choice: ", true);
-	// handleInput(2, input, choices);
 }
 
 void flickeringLight()
