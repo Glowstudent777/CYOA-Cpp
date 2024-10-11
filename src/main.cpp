@@ -68,9 +68,13 @@ void PressEnterToContinue()
 	char ch;
 
 	cout << "Press Enter to continue...";
-	ch = getch();
+	while (true)
+	{
+		ch = _getch();
+		if (ch == 13)
+			break;
+	}
 	// cin.get();
-	// cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	// cin.ignore();
 }
 
@@ -143,6 +147,7 @@ void getScreen(int screen)
 
 void changeScene(int scene)
 {
+	clearScreen();
 	switch (scene)
 	{
 	case 1:
@@ -328,22 +333,17 @@ void instructionScreen()
 bool quickTimeEvent(char expected, int time)
 {
 	char ch;
-	auto startTime = chrono::high_resolution_clock::now();
-
-	bool playerResponded = false;
-	std::thread inputThread([&playerResponded, &ch]()
-							{
-		ch = getch();
-        playerResponded = true; });
-
-	while (!playerResponded &&
-		   chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count() < time * 1000)
+	clock_t start = clock();
+	while ((clock() - start) / CLOCKS_PER_SEC < time)
 	{
-		this_thread::sleep_for(chrono::milliseconds(50));
+		if (_kbhit())
+		{
+			cin.get(ch);
+			break;
+		}
 	}
 
-	inputThread.detach();
-	return playerResponded && ch == expected;
+	return ch == expected;
 }
 
 void handleInput(int screen, char input, int (&choices)[4])
@@ -637,7 +637,7 @@ void abandonedFactory()
 	PressEnterToContinue();
 
 	// Quick time event to dodge the bullets
-	cout << "Press 'd' to dodge the bullets: ";
+	cout << "\nPress 'd' to dodge the bullets: ";
 	bool dodged = quickTimeEvent('d', 2);
 
 	clearScreen();
