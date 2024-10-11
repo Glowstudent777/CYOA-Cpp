@@ -43,7 +43,10 @@ void printChoices(int screen, int (&choices)[4]);
 void handleInput(int screen, char input, int (&choices)[4]);
 void wakeUp();
 void leaveShelter();
+void abandonedFactory();
 void flickeringLight();
+void flickeringLight_1();
+void flickeringLight_2();
 
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
@@ -368,11 +371,16 @@ void handleInput(int screen, char input, int (&choices)[4])
 			choices[1] = 1;
 			break;
 		case ('3'):
-			cout << "You listen to the radio for any updates from fellow stalkers.\n";
+			cout << "You listen to the radio for any updates from fellow stalkers.\n"
+				 << "There isn't much chatter but there is a guitar playing.\n";
+			addFlag(1);
 			choices[2] = 1;
 			break;
 		case ('4'):
-			cout << "You draw a map of the nearby locations you remember.\n";
+			cout << "You draw a map of the nearby locations you remember.\n"
+				 << "You remember a place called Pripyat.\n";
+			// Remember Pripyat
+			addFlag(0);
 			choices[3] = 1;
 			break;
 		default:
@@ -385,10 +393,12 @@ void handleInput(int screen, char input, int (&choices)[4])
 		switch (input)
 		{
 		case ('1'):
+			// Stalkers
 			flickeringLight();
 			break;
 		case ('2'):
-			cout << "You head towards the abandoned factory.\n";
+			// Bandits
+			abandonedFactory();
 			break;
 		default:
 			cout << "Invalid choice\n";
@@ -401,17 +411,24 @@ void handleInput(int screen, char input, int (&choices)[4])
 		switch (input)
 		{
 		case ('1'):
-			cout << "You approach the stalkers and introduce yourself.\n";
+			flickeringLight_1();
 			break;
 		case ('2'):
-			cout << "You sneak around to search their supplies.\n";
+			flickeringLight_2();
 			break;
 		case ('3'):
+			// Basically a skip to Pripyat
 			cout << "You offer to help the wounded stalker.\n";
 			break;
 		default:
 			cout << "Invalid choice\n";
 			break;
+		}
+		break;
+	case 4:
+		clearScreen();
+		switch (input)
+		{
 		}
 		break;
 	}
@@ -519,6 +536,38 @@ void printChoices(int screen, int (&choices)[4])
 			count++;
 		}
 		break;
+	case 4:
+		for (int i = 0; i < choicesCount; i++)
+		{
+			if (choices[i] == 0)
+				cout << i + 1;
+
+			switch (count)
+			{
+			case 0:
+				if (choices[i] == 0)
+				{
+					// Stalkers around the campfire
+					// Some quest to help them
+					cout << ". Ask what they're doing." << endl;
+				}
+				break;
+			case 1:
+				if (choices[i] == 0)
+				{
+					cout << ". SOMETHING HERE." << endl;
+				}
+				break;
+			case 2:
+				if (choices[i] == 0)
+				{
+					cout << ". Ask about Pripyat." << endl;
+				}
+				break;
+			}
+			count++;
+		}
+		break;
 	}
 
 	cout << "==============================\n";
@@ -551,6 +600,26 @@ void leaveShelter()
 	handleInput(2, input, choices);
 }
 
+void abandonedFactory()
+{
+	char input;
+	int choices[] = {0, 0, -1, -1};
+	// Enter cautiously and explore the ground floor. - Sewers/Tunnel, door to the basement, and a staircase to the upper floors.
+	// UPSTAIRS: Climb to the roof for a better vantage point. - Probably see another location and/or the Stalker group. Pripayt?
+	// Search the surrounding area for supplies first. - Find something, maybe an artifact or a weapon.
+
+	// Alternative story: The factory is under bandit control and will be attacked by the Stalker group.
+	// Join Bandits or Stalkers? - This depends on whether the player went to the flickering light or not.
+	// Somehow get Pripyat location from the bandits or the building.
+	cout << "You head towards the abandoned factory.\n"
+		 << endl;
+
+	// Fill in after flickeringLight story is done.
+	// printChoices(2, choices);
+	// getChar(input, 2, "Enter your choice: ", true);
+	// handleInput(2, input, choices);
+}
+
 void flickeringLight()
 {
 	char input;
@@ -565,6 +634,61 @@ void flickeringLight()
 	printChoices(3, choices);
 	getChar(input, 3, "Enter your choice: ", true);
 	handleInput(3, input, choices);
+}
+
+void flickeringLight_1()
+{
+	char input;
+	int choices[] = {0, 0, -1, -1};
+	if (FLAGS[0] == 1)
+		choices[2] = 0;
+
+	clearScreen();
+	cout << "You approach the stalkers and introduce yourself.\n"
+		 << "They welcome you and offer you a seat by the fire.\n";
+
+	// FLAG for guitar playing
+	if (FLAGS[1] == 1)
+		cout << "One of the stalkers is playing the guitar you heard on the radio.\n";
+
+	// Awarded Pripyat location from the stalkers for being friendly.
+	// Quick time event to dodge a bullet from a bandit?
+
+	cout << "You learn that they are a group of stalkers who are also looking for artifacts.\n"
+		 << "They offer you a chance to join them in a raid on the nearby factory.\n"
+		 << endl;
+
+	printChoices(4, choices);
+	getChar(input, 4, "Enter your choice: ", true);
+	handleInput(3, input, choices);
+}
+
+void flickeringLight_healWoundedStalker()
+{
+	clearScreen();
+	cout << "You offer to help the wounded stalker.\n"
+		 << "You use your medkit to heal his wounds.\n"
+		 << "The stalker thanks you and offers you a reward.\n"
+		 << "He gives you a map of the area and marks a location called Pripyat.\n"
+		 << "He tells you that there are valuable artifacts there.\n"
+		 << "You decide to head to Pripyat to find the artifacts.\n"
+		 << endl;
+
+	// Start Pripyat story line
+}
+
+void flickeringLight_2()
+{
+	clearScreen();
+	cout << "GAME OVER\n"
+		 << "As you start sneaking around, you hear a voice behind you.\n"
+		 << "You turn around and see a stalker aiming a rifle at you.\n"
+		 << "Your gear is taken from you and you are left to die in the Zone.\n"
+		 << endl;
+
+	cout << "Press ENTER to return to the main menu...";
+	cin.get();
+	getScreen(1);
 }
 
 int main()
