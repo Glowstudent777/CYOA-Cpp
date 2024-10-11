@@ -335,10 +335,10 @@ bool quickTimeEvent(char expected, int time)
 	char input;
 	bool recieved = false;
 
-	thread t1([&]() {
+	thread t1([&]()
+			  {
 		cin >> input;
-		recieved = true;
-	});
+		recieved = true; });
 
 	for (int i = 0; i < time; ++i)
 	{
@@ -356,12 +356,6 @@ bool quickTimeEvent(char expected, int time)
 void handleInput(int screen, char input, int (&choices)[4])
 {
 	resetInput();
-
-	// DEBUG
-	cout << choices[0] << choices[1] << choices[2] << choices[3] << endl;
-	cout << !isalpha(input) << endl;
-	if (!isalpha(input))
-		cout << choices[(input - '0') - 1] << endl;
 
 	while (!isalpha(input) && choices[(input - '0') - 1] == 1)
 	{
@@ -641,6 +635,45 @@ void abandonedFactory()
 	// Somehow get Pripyat location from the bandits or the building.
 	cout << "You head towards the abandoned factory.\n"
 		 << endl;
+
+	// This is just for testing purposes
+	cout << "You are shot at by bandits as you approach the factory.\n"
+		 << "Get ready to dodge the bullets!\n"
+		 << endl;
+
+	cout << "Press ENTER to continue...";
+	cin.get();
+
+	// Quick time event to dodge the bullets
+	cout << "Press 'd' to dodge the bullets: ";
+	bool dodged = quickTimeEvent('d', 2);
+
+	if (dodged)
+	{
+		resetInput();
+		clearScreen();
+		cout << "You dodge the bullets and take cover behind a nearby car.\n"
+			 << "You see a group of bandits guarding the entrance to the factory.\n"
+			 << "You need to decide your next move.\n"
+			 << endl;
+
+		cout << "Press ENTER to continue...";
+		cin.get();
+		exitGame();
+	}
+	else
+	{
+		resetInput();
+		clearScreen();
+		cout << "You are hit by a bullet and fall to the ground.\n"
+			 << "The bandits approach you and take your gear.\n"
+			 << "You are left to die in the Zone.\n"
+			 << endl;
+
+		cout << "Press ENTER to return to the main menu...";
+		cin.get();
+		getScreen(1);
+	}
 
 	// Fill in after flickeringLight story is done.
 	// printChoices(2, choices);
