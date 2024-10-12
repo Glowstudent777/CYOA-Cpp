@@ -33,11 +33,14 @@ void handleInput(int screen, char input, int (&choices)[4]);
 void wakeUp();
 void leaveShelter();
 
+void soloZone();
+
 void abandonedFactory();
 
 void flickeringLight();
 void flickeringLight_1();
 void flickeringLight_2();
+void flickeringLight_healWoundedStalker();
 
 void resetInput();
 void getInt(int &input, int program, int min, int max, string cmessage, bool clearOnFail);
@@ -324,6 +327,7 @@ void instructionScreen()
 	cout << "==============================\n";
 	cout << "q: Exit\n";
 	cout << "1-4: Choices 1-4\n";
+	cout << "a/s/d/f: Quick Time Events\n";
 	cout << "==============================\n";
 	cout << "Press ENTER to return to the main menu...";
 	cin.get();
@@ -372,15 +376,14 @@ void handleInput(int screen, char input, int (&choices)[4])
 			changeScene(2);
 			break;
 		case ('2'):
+			cout << "You check your gear for supplies and weapons.\n";
 			if (flipWeighted(1, 10, 8))
 			{
-				cout << "You check your gear for supplies and weapons.\n";
 				cout << "You find a medkit.\n";
 				addInventory(1);
 			}
 			else
 			{
-				cout << "You check your gear for supplies and weapons.\n";
 				cout << "You find nothing useful.\n";
 			}
 			choices[1] = 1;
@@ -390,13 +393,6 @@ void handleInput(int screen, char input, int (&choices)[4])
 				 << "There isn't much chatter but there is a guitar playing.\n";
 			addFlag(1);
 			choices[2] = 1;
-			break;
-		case ('4'):
-			cout << "You draw a map of the nearby locations you remember.\n"
-				 << "You remember a place called Pripyat.\n";
-			// Remember Pripyat
-			addFlag(0);
-			choices[3] = 1;
 			break;
 		default:
 			cout << "Invalid choice\n";
@@ -432,8 +428,7 @@ void handleInput(int screen, char input, int (&choices)[4])
 			flickeringLight_2();
 			break;
 		case ('3'):
-			// Basically a skip to Pripyat
-			cout << "You offer to help the wounded stalker.\n";
+			flickeringLight_healWoundedStalker();
 			break;
 		default:
 			cout << "Invalid choice\n";
@@ -444,6 +439,21 @@ void handleInput(int screen, char input, int (&choices)[4])
 		clearScreen();
 		switch (input)
 		{
+		case ('1'):
+			cout << "You join the raid on the factory.\n";
+			break;
+		case ('2'):
+			cout << "You politely decline their offer to join the raid, explaining that you're more interested in heading to Pripyat.\n"
+				 << "The stalkers nod understandingly, though they warn you about the dangers that lie ahead.\n"
+				 << "\"Pripyat's a tough place,\" one of the stalkers says, poking the fire. \"But if you know what you're looking for, you might just make it out alive.\"\n"
+				 << "They hand you a map with Pripyat marked and share some crucial advice: \"Beware the radiation pockets and watch out for bandits.\"\n"
+				 << "With the map in hand, you prepare to set off towards Pripyat on your own, determined to find the artifacts.\n"
+				 << "But now, you'll face the dangers of the Zone alone, without backup.\n"
+				 << endl;
+			PressEnterToContinue();
+			clearScreen();
+			soloZone();
+			break;
 		}
 		break;
 	}
@@ -485,12 +495,6 @@ void printChoices(int screen, int (&choices)[4])
 				if (choices[i] == 0)
 				{
 					cout << ". Listen to the radio for any updates from fellow stalkers." << endl;
-				}
-				break;
-			case 3:
-				if (choices[i] == 0)
-				{
-					cout << ". Draw a map of the nearby locations you remember." << endl;
 				}
 				break;
 			}
@@ -562,21 +566,13 @@ void printChoices(int screen, int (&choices)[4])
 			case 0:
 				if (choices[i] == 0)
 				{
-					// Stalkers around the campfire
-					// Some quest to help them
-					cout << ". Ask what they're doing." << endl;
+					cout << ". Join the raid" << endl;
 				}
 				break;
 			case 1:
 				if (choices[i] == 0)
 				{
-					cout << ". SOMETHING HERE." << endl;
-				}
-				break;
-			case 2:
-				if (choices[i] == 0)
-				{
-					cout << ". Ask about Pripyat." << endl;
+					cout << ". Politely decline and ask for information on Pripyat instead." << endl;
 				}
 				break;
 			}
@@ -591,9 +587,11 @@ void printChoices(int screen, int (&choices)[4])
 void wakeUp()
 {
 	char input;
-	int choices[] = {0, 0, 0, 0};
+	int choices[] = {0, 0, 0, -1};
 
-	cout << "You wake up in a dimly lit shelter deep within the Zone, the air thick with tension. The faint sounds of distant gunfire echo, reminding you that danger is ever-present. You need to decide your next move to survive and find valuable artifacts.\n"
+	cout << "You wake up in a dimly lit shelter deep within the Zone, the air thick with tension.\n"
+		 << "The faint sounds of distant gunfire echo, reminding you that danger is ever-present.\n"
+		 << "You need to decide your next move to survive and find valuable artifacts.\n"
 		 << endl;
 
 	printChoices(1, choices);
@@ -613,6 +611,18 @@ void leaveShelter()
 	printChoices(2, choices);
 	getChar(input, 2, "Enter your choice: ", true);
 	handleInput(2, input, choices);
+}
+
+void soloZone()
+{
+	char input;
+	int choices[] = {0, 0, -1, -1};
+
+	cout << "You are alone in the Zone.\n"
+		 << "You need to find a way to survive and find valuable artifacts.\n"
+		 << endl;
+
+	PressEnterToContinue();
 }
 
 void abandonedFactory()
@@ -654,7 +664,9 @@ void abandonedFactory()
 	}
 	else
 	{
-		cout << "You are hit by a bullet and fall to the ground.\nThe bandits approach you and take your gear.\nYou are left to die in the Zone."
+		cout << "You are hit by a bullet and fall to the ground.\n"
+			 << "The bandits approach you and take your gear.\n"
+			 << "You are left to die in the Zone.\n"
 			 << endl;
 
 		PressEnterToContinue();
@@ -669,7 +681,8 @@ void flickeringLight()
 	if (hasItem(1))
 		choices[2] = 0;
 
-	cout << "You approach the light and discover it's coming from a small campfire. A group of stalkers sits around it, looking wary but not hostile.\n"
+	cout << "You approach the light and discover it's coming from a small campfire.\n"
+		 << "A group of stalkers sits around it, looking wary but not hostile.\n"
 		 << "As you get closer you see a wounded stalker who needs medical attention.\n"
 		 << endl;
 
@@ -702,21 +715,41 @@ void flickeringLight_1()
 
 	printChoices(4, choices);
 	getChar(input, 4, "Enter your choice: ", true);
-	handleInput(3, input, choices);
+	handleInput(4, input, choices);
 }
 
 void flickeringLight_healWoundedStalker()
 {
+	char input;
+	int choices[] = {0, 0, -1, -1};
+
 	clearScreen();
-	cout << "You offer to help the wounded stalker.\n"
-		 << "You use your medkit to heal his wounds.\n"
-		 << "The stalker thanks you and offers you a reward.\n"
-		 << "He gives you a map of the area and marks a location called Pripyat.\n"
-		 << "He tells you that there are valuable artifacts there.\n"
-		 << "You decide to head to Pripyat to find the artifacts.\n"
+	cout << "You offer medical assistance to the wounded stalker using your medkit.\n"
+		 << "Grateful, the stalker gives you a map that marks a location called Pripyat,\n"
+		 << "rumored to contain valuable artifacts.\n"
+		 << "The stalkers are impressed by your kindness and offer you a chance to join them\n"
+		 << "in a raid on the nearby factory that is sure to yield valuable artifacts.\n"
 		 << endl;
 
-	// Start Pripyat story line
+	// Add Pripyat location
+	addFlag(0);
+
+	PressEnterToContinue();
+	clearScreen();
+
+	// Duplicate, if I had more time I would do a printStory() function
+	// Would also probably do a choices input for these because I could reuse the previous function by just cutting out the third option
+	cout << "You offer medical assistance to the wounded stalker using your medkit.\n"
+		 << "Grateful, the stalker gives you a map that marks a location called Pripyat,\n"
+		 << "rumored to contain valuable artifacts.\n"
+		 << "The stalkers are impressed by your kindness and offer you a chance to join them\n"
+		 << "in a raid on the nearby factory that is sure to yield valuable artifacts.\n"
+		 << endl;
+
+	cout << "What will you do next?\n";
+	printChoices(4, choices);
+	getChar(input, 4, "Enter your choice: ", true);
+	handleInput(4, input, choices);
 }
 
 void flickeringLight_2()
