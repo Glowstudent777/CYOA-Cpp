@@ -70,6 +70,7 @@ bool quickTimeEvent(char expected, int time);
 void PressEnterToContinue();
 bool shootQTE(char qte);
 
+// Unfortunatly messy and super short as I'm restricted to a single file and only a couple days to complete this project
 void clearScreen()
 {
 	// Clear the screen
@@ -100,8 +101,6 @@ void PressEnterToContinue()
 			break;
 	}
 	cout << endl;
-	// cin.get();
-	// cin.ignore();
 }
 
 void resetChoices(int (&choices)[4])
@@ -513,6 +512,9 @@ void handleInput(int screen, char input, int (&choices)[4])
 			clearScreen();
 			soloZone();
 			break;
+		default:
+			cout << "Invalid choice\n";
+			break;
 		}
 		break;
 
@@ -526,6 +528,9 @@ void handleInput(int screen, char input, int (&choices)[4])
 		case ('2'):
 			soloZone_house();
 			break;
+		default:
+			cout << "Invalid choice\n";
+			break;
 		}
 		break;
 
@@ -538,6 +543,9 @@ void handleInput(int screen, char input, int (&choices)[4])
 			break;
 		case ('2'):
 			abandonedFactory_bandits();
+			break;
+		default:
+			cout << "Invalid choice\n";
 			break;
 		}
 		break;
@@ -601,6 +609,9 @@ void handleInput(int screen, char input, int (&choices)[4])
 
 			PressEnterToContinue();
 			getScreen(1);
+			break;
+		default:
+			cout << "Invalid choice\n";
 			break;
 		}
 		break;
@@ -997,7 +1008,7 @@ void abandonedFactory_stalkers()
 			 << "As you walk, you can't help but feel a sense of unease.\n"
 			 << "You're not sure what lies ahead, but you know that you're ready for whatever comes your way.\n"
 			 << endl;
-			
+
 		PressEnterToContinue();
 		clearScreen();
 
@@ -1052,6 +1063,21 @@ void abandonedFactory_bandits()
 
 		// TODO: Add Pripyat location to map
 		// Give end story before road to Pripyat
+
+		PressEnterToContinue();
+		clearScreen();
+
+		cout << "You start your journey towards Pripyat.\n"
+			 << "The road is long and dangerous, but you're determined to make it.\n"
+			 << "You've heard stories of the artifacts that lie within the city, and you're eager to find them.\n"
+			 << "As you walk, you can't help but feel a sense of unease.\n"
+			 << "You're not sure what lies ahead, but you know that you're ready for whatever comes your way.\n"
+			 << endl;
+
+		PressEnterToContinue();
+		clearScreen();
+
+		roadToPripyat();
 	}
 	else
 	{
