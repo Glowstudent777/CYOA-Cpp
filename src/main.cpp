@@ -874,7 +874,7 @@ void soloZone_car()
 
 	cout << "You approach the overturned truck and search for supplies.\n"
 		 << "You find a valuable" << magenta << " artifact" << reset << " hidden in the back.\n"
-		 << "You pocket the " << magenta << "artifact" << reset << " and continue on your way.\n"
+		 << "You pocket the " << magenta << "artifact" << reset << " and turn around to leave.\n"
 		 << endl;
 
 	addInventory(2);
